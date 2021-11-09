@@ -2,14 +2,14 @@ const express = require('express');
 const router = new express.Router();
 const Task = require('../models/taskModel')
 
-
 router.get('/get-tasks', async (req, res) => {
     try{
         const tasks = await Task.find({})
-        if(!tasks) res.send([])
-        res.send(tasks)
+        res.status(200).send(tasks)
     }catch(error){
-        console.log(error)
+        res.status(500).send({
+            message: error
+        })
     }
 })
 
@@ -19,44 +19,36 @@ router.put('/create-new-task', async (req, res) => {
             content: req.body.content,
             statusIsCompleted: false
         })
-
-        try {
-            task.save()
-        } catch (error) {
-            console.log(error)
-        }
-        res.send('ok')
-
-    } catch (error) {
-        console.log(error)
+        await task.save()
+        res.status(200).send(task)
+    }catch(error){
+        res.status(500).send({
+            message: error
+        })
     }
 })
 
 router.patch('/update-task', async (req, res) => {
-    console.log(req.body.id)
     try {
         const task = await Task.findById(req.body.id)
         task.statusIsCompleted = !task.statusIsCompleted
-
-        try {
-            task.save()
-        } catch (error) {
-            console.log(error)  
-        }
-
-        res.send('ok')
-    } catch (error) {
-        console.log(error)
+        await task.save()
+        res.sendStatus(200)
+    }catch(error){
+        res.status(500).send({
+            message: error
+        })
     }
 })
 
 router.delete('/delete-task', async (req, res) => {
     try {
         await Task.findByIdAndDelete(req.body.id);
-
-        res.send('ok')
-    } catch (error) {
-        console.log(error)
+        res.sendStatus(200)
+    }catch(error){
+        res.status(500).send({
+            message: error
+        })
     }
 })
 
